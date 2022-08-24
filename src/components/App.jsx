@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { SearchBar } from './SearchBar/SearchBar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
+import { Loader } from './Loader/Loader';
 import axios from 'axios';
 
 export class App extends Component {
@@ -10,10 +11,11 @@ export class App extends Component {
     page: 2,
     search: '',
     nextSearch: '',
+    isLoading: false,
   }
 
   changeSearchValue = ({searchPicture}) => {
-    this.setState( {nextSearch: searchPicture} )
+    this.setState( {nextSearch: searchPicture, isLoading: true} )
   }
 
   // async componentDidMount(){
@@ -47,14 +49,16 @@ export class App extends Component {
       per_page: 12,
       page: {page},
     });
+    // this.setState({ isLoading: true });
     if (nextSearch  !==  search) {
+      
+      
       const response = await axios.get(
         `https://pixabay.com/api/?key=${API_KEY}&q=${nextSearch}&${params}`
         
-      );
-      this.setState({search: nextSearch})
+      );      
       const responseData = response.data.hits;
-      this.setState({pictures: responseData})
+      this.setState({search: nextSearch, pictures: responseData, isLoading: false})
     } 
   }
     
@@ -65,9 +69,16 @@ export class App extends Component {
         <SearchBar 
           newSearch={this.changeSearchValue}
         />
-        <ImageGallery
-          pictures={this.state.pictures}
-        />
+        <div>
+          {this.state.isLoading ? (
+            <Loader/>            
+          ) : (
+            <ImageGallery
+            pictures={this.state.pictures}
+          />
+          )}
+        </div>
+        
       </div>
     );
   }
