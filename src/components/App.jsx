@@ -3,7 +3,7 @@ import { SearchBar } from './SearchBar/SearchBar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
 import { Button } from './Button/Button';
-import axios from 'axios';
+import { fetchPhotos } from 'api/fetchPhotos';
 
 const INITIAL_STATE = {
   pictures: [],
@@ -11,6 +11,7 @@ const INITIAL_STATE = {
   search: '',
   nextSearch: '',
   isLoading: false,
+  error: null,
 };
 
 export class App extends Component {
@@ -18,33 +19,49 @@ export class App extends Component {
     ...INITIAL_STATE,
   };
 
-  fetchPhotos = async (searchP, currentPage) => {
-    console.log('searching.....');
+  // fetchPhotos = async (searchP, currentPage) => {
+  //   console.log('searching.....');
 
-    const API_KEY = '1424879-278d005ef871cdc02a09416fb';
-    const params = new URLSearchParams({
-      image_type: 'photo',
-      orientation: 'horizontal',
-      safesearch: 'true',
-      per_page: 12,
-      page: currentPage,
-    });
+  //   const API_KEY = '1424879-278d005ef871cdc02a09416fb';
+  //   const params = new URLSearchParams({
+  //     image_type: 'photo',
+  //     orientation: 'horizontal',
+  //     safesearch: 'true',
+  //     per_page: 12,
+  //     page: currentPage,
+  //   });
 
-    const response = await axios.get(
-      `https://pixabay.com/api/?key=${API_KEY}&q=${searchP}&${params}`
-    );
-    const responseData = response.data.hits;
-    return responseData;
-  };
+  //   const response = await axios.get(
+  //     `https://pixabay.com/api/?key=${API_KEY}&q=${searchP}&${params}`
+  //   );
+  //   const responseData = response.data.hits;
+  //   return responseData;
+  // };
 
   updatePictures = async newSearch => {
-    const { page, pictures } = this.state;
-    const photos = await this.fetchPhotos(newSearch, page);
-    const oldPictures = pictures;
-    console.log(oldPictures);
-    const newPictures = [...oldPictures, ...photos];
-    console.log(newPictures);
-    this.setState({ pictures: newPictures, isLoading: false, page: page + 1 });
+    const { page, pictures, search } = this.state;
+
+    try {
+      const photos = await fetchPhotos(newSearch, page);
+      const oldPictures = pictures;
+      if (photos.length !== 0) {
+        console.log(oldPictures);
+        const newPictures = [...oldPictures, ...photos];
+        console.log(newPictures);
+        if (search !== newSearch) {
+          this.setState({ pictures: photos});
+        }  if (search === newSearch) {
+          this.setState({ pictures: newPictures, page: page + 1 });
+        }
+        
+      } else {
+        alert('Sorry, no image matching');
+      }
+    } catch (error) {
+      this.setState({ error });
+    } finally {
+      this.setState({ isLoading: false });
+    }
   };
 
   resetArray = searchPicture => {
@@ -71,9 +88,6 @@ export class App extends Component {
   };
 
   loadMorePictures = () => {
-    // this.setState(state => ({
-    //   page: state.page + 1
-    // }))
     const { page, nextSearch } = this.state;
     this.addPages();
     console.log(page);
@@ -90,18 +104,17 @@ export class App extends Component {
   }
 
   render() {
+    const { error, page, pictures, isLoading } = this.state;
+
     return (
       <div>
         <SearchBar newSearch={this.changeSearchValue} />
         <div>
-          {this.state.isLoading ? (
-            <Loader />
-          ) : (
-            <ImageGallery pictures={this.state.pictures} />
-          )}
+          {error && <p>ERROR: Whoops, something went wrong: {error.message}</p>}
+          {isLoading ? <Loader /> : <ImageGallery pictures={pictures} />}
         </div>
         <div>
-          {this.state.page > 1 ? (
+          {page > 1 && pictures.length > 0 ? (
             <Button text="Load more" func={this.loadMorePictures} />
           ) : (
             ''
