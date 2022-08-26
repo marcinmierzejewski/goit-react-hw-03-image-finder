@@ -5,116 +5,94 @@ import { Loader } from './Loader/Loader';
 import { Button } from './Button/Button';
 import axios from 'axios';
 
+const INITIAL_STATE = {
+  pictures: [],
+  page: 1,
+  search: '',
+  nextSearch: '',
+  isLoading: false,
+};
+
 export class App extends Component {
   state = {
-    pictures: [],
-    page: 1,
-    search: '',
-    isLoading: false,
+    ...INITIAL_STATE,
   };
 
-  fetchPhotos = async (searchP) => {
+  fetchPhotos = async (searchP, currentPage) => {
     console.log('searching.....');
-    const { page, pictures } = this.state;
+
     const API_KEY = '1424879-278d005ef871cdc02a09416fb';
     const params = new URLSearchParams({
       image_type: 'photo',
       orientation: 'horizontal',
       safesearch: 'true',
       per_page: 12,
-      page: page,
+      page: currentPage,
     });
 
     const response = await axios.get(
       `https://pixabay.com/api/?key=${API_KEY}&q=${searchP}&${params}`
     );
     const responseData = response.data.hits;
+    return responseData;
+  };
+
+  updatePictures = async newSearch => {
+    const { page, pictures } = this.state;
+    const photos = await this.fetchPhotos(newSearch, page);
     const oldPictures = pictures;
     console.log(oldPictures);
-    const newPictures = [...oldPictures, ...responseData];
+    const newPictures = [...oldPictures, ...photos];
     console.log(newPictures);
-    this.setState({ pictures: newPictures, isLoading: false, page: page+1 });
+    this.setState({ pictures: newPictures, isLoading: false, page: page + 1 });
+  };
+
+  resetArray = searchPicture => {
+    this.setState({
+      search: searchPicture,
+      isLoading: true,
+      pictures: [],
+      page: 1,
+    });
   };
 
   changeSearchValue = ({ searchPicture }) => {
-    console.log(`searchPicture: ${searchPicture}`)
-    this.setState(state => ({
-      search: searchPicture, isLoading: true 
-    }));
+    console.log(`searchPicture: ${searchPicture}`);
+    console.log(`Po reset ${this.state.pictures}`);
+    this.resetArray(searchPicture);
     console.log('szukaj');
-    this.fetchPhotos(searchPicture);
+    this.updatePictures(searchPicture);
   };
 
   addPages = () => {
-    this.setState((oldState) => ({
-      
+    this.setState(oldState => ({
       page: oldState.page + 1,
     }));
-  }
+  };
 
   loadMorePictures = () => {
     // this.setState(state => ({
     //   page: state.page + 1
     // }))
-    const {page, search} = this.state
-    this.addPages()
-    console.log(page)
-    console.log(search)
-    this.fetchPhotos(search)
+    const { page, nextSearch } = this.state;
+    this.addPages();
+    console.log(page);
+    this.updatePictures(nextSearch);
+  };
+
+  async componentDidUpdate() {
+    console.log('update....');
+    const { search, nextSearch } = this.state;
+    if (nextSearch !== search) {
+      this.updatePictures(search);
+      this.setState({ nextSearch: search });
+    }
   }
-    
-
-  // async componentDidMount(){
-  //   console.log('componentDidMount')
-  //   const {search} = this.state
-  //   const API_KEY = '1424879-278d005ef871cdc02a09416fb';
-  //   const params = new URLSearchParams({
-  //     image_type: 'photo',
-  //     orientation: 'horizontal',
-  //     safesearch: 'true',
-  //     per_page: 12,
-  //     page: 1,
-  //   });
-  //   if (search) {
-  //     const response = await axios.get(
-  //       `https://pixabay.com/api/?key=${API_KEY}&q=${search}&${params}`
-  //     );
-  //     const responseData = response.data;
-  //     this.setState({pictures: responseData})
-  //   }
-  // }
-
-  // async componentDidUpdate(){
-  //   console.log('componentDidUpdate')
-  //   const { page, search, nextSearch, pictures} = this.state
-  //   const API_KEY = '1424879-278d005ef871cdc02a09416fb';
-  //   const params = new URLSearchParams({
-  //     image_type: 'photo',
-  //     orientation: 'horizontal',
-  //     safesearch: 'true',
-  //     per_page: 12,
-  //     page: {page},
-  //   });
-  //   // this.setState({ isLoading: true });
-  //   if (nextSearch  !==  search) {
-
-  //     const response = await axios.get(
-  //       `https://pixabay.com/api/?key=${API_KEY}&q=${nextSearch}&${params}`
-
-  //     );
-  //     const responseData = response.data.hits;
-  //     const currentPictures = pictures
-  //     console.log(currentPictures);
-  //     const allPictures = [...currentPictures, ...responseData];
-  //     console.log(allPictures)
-  //     this.setState({search: nextSearch, pictures: allPictures, isLoading: false})
-  //   }
-  // }
 
   render() {
     return (
       <div>
-        <SearchBar newSearch={this.changeSearchValue}/>
+        <SearchBar newSearch={this.changeSearchValue} />
         <div>
           {this.state.isLoading ? (
             <Loader />
@@ -123,10 +101,11 @@ export class App extends Component {
           )}
         </div>
         <div>
-          <Button
-            text='Load more'
-            func={this.loadMorePictures}
-          />
+          {this.state.page > 1 ? (
+            <Button text="Load more" func={this.loadMorePictures} />
+          ) : (
+            ''
+          )}
         </div>
       </div>
     );
