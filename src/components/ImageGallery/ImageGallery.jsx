@@ -1,10 +1,13 @@
 import { ImageGalleryItem } from "components/ImageGalleryItem/ImageGalleryItem";
+import styles from './ImageGallery.module.css'
 
 export const ImageGallery = ({ pictures }) => {
+  const  { Gallery } = styles
+
   return(
-    <div>
+    <>
       {pictures.length > 0 ? (
-        <ul>
+        <ul className={Gallery}>
           {pictures.map(({id, webformatURL, largeImageURL}) => (
             <ImageGalleryItem
               key={id}
@@ -16,6 +19,6 @@ export const ImageGallery = ({ pictures }) => {
       ) : (
         ''
       )}
-    </div>
+    </>
   )
 }
