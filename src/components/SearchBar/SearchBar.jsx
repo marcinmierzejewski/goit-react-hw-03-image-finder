@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import styles from './SearchBar.module.css'
+import styles from './SearchBar.module.css';
 
 export class SearchBar extends Component {
   state = {
@@ -12,27 +12,33 @@ export class SearchBar extends Component {
 
   valueSubmit = e => {
     e.preventDefault();
-    console.log(`Search: ${this.state.searchPicture}`);
     this.props.newSearch({ ...this.state });
-    this.setState({ searchPicture: ''});
+    this.setState({ searchPicture: '' });
   };
 
   render() {
-    const {SearchBar, SearchForm, SearchFormButton,  SearchFormButtonLabel, SearchFormInput } = styles;
+    const {
+      SearchBar,
+      SearchForm,
+      SearchFormButton,
+      SearchFormButtonLabel,
+      SearchFormInput,
+    } = styles;
 
     return (
       <header className={SearchBar}>
         <form className={SearchForm} onSubmit={this.valueSubmit}>
           <button className={SearchFormButton} type="submit">
-            <span className={SearchFormButtonLabel} >Search</span>
+            <span className={SearchFormButtonLabel}>Search</span>
           </button>
 
-          <input className={SearchFormInput}
+          <input
+            className={SearchFormInput}
             type="text"
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
-            name='searchPicture'
+            name="searchPicture"
             onChange={this.inputChange}
           />
         </form>

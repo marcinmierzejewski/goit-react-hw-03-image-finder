@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 export const fetchPhotos = async (searchP, currentPage) => {
-  console.log('searching.....');
 
   const API_KEY = '1424879-278d005ef871cdc02a09416fb';
   const params = new URLSearchParams({

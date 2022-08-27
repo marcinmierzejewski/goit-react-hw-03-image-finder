@@ -3,20 +3,19 @@ import { SearchBar } from './SearchBar/SearchBar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
 import { Button } from './Button/Button';
+import { Modal } from './Modal/Modal';
 import { fetchPhotos } from 'api/fetchPhotos';
-
-const INITIAL_STATE = {
-  pictures: [],
-  page: 1,
-  search: '',
-  nextSearch: '',
-  isLoading: false,
-  error: null,
-};
 
 export class App extends Component {
   state = {
-    ...INITIAL_STATE,
+    pictures: [],
+    page: 1,
+    search: '',
+    nextSearch: '',
+    isLoading: false,
+    isModalOpen: false,
+    modalImg: null,
+    error: null,
   };
 
   // fetchPhotos = async (searchP, currentPage) => {
@@ -45,15 +44,15 @@ export class App extends Component {
       const photos = await fetchPhotos(newSearch, page);
       const oldPictures = pictures;
       if (photos.length !== 0) {
-        console.log(oldPictures);
+        // console.log(oldPictures);
         const newPictures = [...oldPictures, ...photos];
-        console.log(newPictures);
+        // console.log(newPictures);
         if (search !== newSearch) {
-          this.setState({ pictures: photos});
-        }  if (search === newSearch) {
+          this.setState({ pictures: photos, page: 1 });
+        }
+        if (search === newSearch) {
           this.setState({ pictures: newPictures, page: page + 1 });
         }
-        
       } else {
         alert('Sorry, no image matching');
       }
@@ -74,28 +73,26 @@ export class App extends Component {
   };
 
   changeSearchValue = ({ searchPicture }) => {
-    console.log(`searchPicture: ${searchPicture}`);
-    console.log(`Po reset ${this.state.pictures}`);
+    // console.log(`searchPicture: ${searchPicture}`);
+    // console.log(`Po reset ${this.state.pictures}`);
     this.resetArray(searchPicture);
-    console.log('szukaj');
+    // console.log('szukaj');
     this.updatePictures(searchPicture);
   };
 
-  addPages = () => {
-    this.setState(oldState => ({
-      page: oldState.page + 1,
-    }));
-  };
+  // addPages = () => {
+  //   this.setState(oldState => ({
+  //     page: oldState.page + 1,
+  //   }));
+  // };
 
   loadMorePictures = () => {
-    const { page, nextSearch } = this.state;
-    this.addPages();
-    console.log(page);
+    const { nextSearch } = this.state;
+    // this.addPages();
     this.updatePictures(nextSearch);
   };
 
   async componentDidUpdate() {
-    console.log('update....');
     const { search, nextSearch } = this.state;
     if (nextSearch !== search) {
       this.updatePictures(search);
@@ -103,23 +100,67 @@ export class App extends Component {
     }
   }
 
+  openModalWindow = e => {
+    const largeImg = e.target.dataset.source;
+    if (e.target.nodeName !== 'IMG') {
+      return;
+    }
+    this.setState({
+      modalImg: largeImg,
+      isModalOpen: true,
+    });
+  };
+
+  closeModalWindow = e => {
+    if (e.target.nodeName === 'IMG') {
+      return;
+    }
+    this.setState({ isModalOpen: false });
+  };
+
   render() {
-    const { error, page, pictures, isLoading } = this.state;
+    const { error, pictures, isLoading, isModalOpen, modalImg } =
+      this.state;
+
+    if (isModalOpen) {
+      window.addEventListener('keydown', e => {
+        if (e.code === 'Escape') {
+          this.setState({ isModalOpen: false });
+        }
+      });
+    } else {
+      window.removeEventListener('keydown', e => {
+        if (e.code === 'Escape') {
+          this.setState({ isModalOpen: false });
+        }
+      });
+    }    
 
     return (
       <div>
         <SearchBar newSearch={this.changeSearchValue} />
-        <div>
-          {error && <p>ERROR: Whoops, something went wrong: {error.message}</p>}
-          {isLoading ? <Loader /> : <ImageGallery pictures={pictures} />}
-        </div>
-        <div>
-          {page > 1 && pictures.length > 0 ? (
-            <Button text="Load more" func={this.loadMorePictures} />
-          ) : (
-            ''
-          )}
-        </div>
+
+        {error && <p>ERROR: Whoops, something went wrong: {error.message}</p>}
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <ImageGallery
+            pictures={pictures}
+            openModalWindow={this.openModalWindow}
+          />
+        )}
+
+        {pictures.length !== 0 ? (
+          <Button text="Load more" func={this.loadMorePictures} />
+        ) : (
+          ''
+        )}
+
+        {isModalOpen ? (
+          <Modal modalImgLarge={modalImg} closeImg={this.closeModalWindow} />
+        ) : (
+          <></>
+        )}
       </div>
     );
   }

@@ -1,12 +1,13 @@
-import styles from './Button.module.css'
+import styles from './Button.module.css';
 
 export const Button = ({ text, func }) => {
-  const {Button} = styles
+  const { Button } = styles;
 
-  return(
+  return (
     <>
-      <button className={Button} type="button" onClick={func}>{text}</button>
+      <button className={Button} type="button" onClick={func}>
+        {text}
+      </button>
     </>
-    
-  )
-}
+  );
+};
