@@ -1,4 +1,5 @@
 import styles from './Button.module.css';
+import PropTypes from "prop-types";
 
 export const Button = ({ text, func }) => {
   const { Button } = styles;
@@ -10,4 +11,9 @@ export const Button = ({ text, func }) => {
       </button>
     </>
   );
+};
+
+Button.propTypes = {
+  text: PropTypes.string.isRequired,
+  func: PropTypes.func.isRequired,
 };

@@ -1,5 +1,6 @@
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import styles from './ImageGallery.module.css';
+import PropTypes from "prop-types";
 
 export const ImageGallery = ({ pictures, openModalWindow }) => {
   const { Gallery } = styles;
@@ -21,4 +22,9 @@ export const ImageGallery = ({ pictures, openModalWindow }) => {
       )}
     </>
   );
+};
+
+ImageGallery.propTypes = {
+  pictures: PropTypes.array.isRequired,
+  openModalWindow: PropTypes.func.isRequired,
 };
