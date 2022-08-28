@@ -1,5 +1,5 @@
 import styles from './Modal.module.css';
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
 export const Modal = ({ modalImgLarge, closeImg }) => {
   const { Overlay, Modal } = styles;

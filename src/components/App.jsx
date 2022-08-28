@@ -25,9 +25,7 @@ export class App extends Component {
       const photos = await fetchPhotos(newSearch, page);
       const oldPictures = pictures;
       if (photos.length !== 0) {
-        // console.log(oldPictures);
         const newPictures = [...oldPictures, ...photos];
-        // console.log(newPictures);
         if (search !== newSearch) {
           this.setState({ pictures: photos, page: 1 });
         }
@@ -54,22 +52,12 @@ export class App extends Component {
   };
 
   changeSearchValue = ({ searchPicture }) => {
-    // console.log(`searchPicture: ${searchPicture}`);
-    // console.log(`Po reset ${this.state.pictures}`);
     this.resetArray(searchPicture);
-    // console.log('szukaj');
     this.updatePictures(searchPicture);
   };
 
-  // addPages = () => {
-  //   this.setState(oldState => ({
-  //     page: oldState.page + 1,
-  //   }));
-  // };
-
   loadMorePictures = () => {
     const { nextSearch } = this.state;
-    // this.addPages();
     this.updatePictures(nextSearch);
   };
 
@@ -100,8 +88,7 @@ export class App extends Component {
   };
 
   render() {
-    const { error, pictures, isLoading, isModalOpen, modalImg } =
-      this.state;
+    const { error, pictures, isLoading, isModalOpen, modalImg } = this.state;
 
     if (isModalOpen) {
       window.addEventListener('keydown', e => {
@@ -109,20 +96,12 @@ export class App extends Component {
           this.setState({ isModalOpen: false });
         }
       });
-    } 
-    // else {
-    //   window.removeEventListener('keydown', e => {
-    //     if (e.code === 'Escape') {
-    //       this.setState({ isModalOpen: false });
-    //     }
-    //   });
-    // }    
+    }
 
     return (
       <div>
         <SearchBar newSearch={this.changeSearchValue} />
-
-        {error && <p>ERROR: Whoops, something went wrong: {error.message}</p>}
+        {error && <p>ERROR: Whoops O_o, something went wrong: {error.message}</p>}
         {isLoading ? (
           <Loader />
         ) : (
@@ -131,13 +110,11 @@ export class App extends Component {
             openModalWindow={this.openModalWindow}
           />
         )}
-
         {pictures.length !== 0 ? (
           <Button text="Load more" func={this.loadMorePictures} />
         ) : (
           ''
         )}
-
         {isModalOpen ? (
           <Modal modalImgLarge={modalImg} closeImg={this.closeModalWindow} />
         ) : (
